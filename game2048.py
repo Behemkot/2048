@@ -1,4 +1,7 @@
 import random
+import numpy as np
+from itertools import cycle
+from pynput import keyboard
 
 class Game2048:
     def __init__(self, demensions):
@@ -6,87 +9,89 @@ class Game2048:
         self.grid = []
         self.score = 0
         self.potential = 0
+
+    def start_game(self):
+        self.new_game()
+
+    def new_game(self):
+        self.score = 0
+        self.potential = 0
         self.__init_grid()
         self.__draw()
 
 
     def __init_grid(self):
-        self.grid = [[None for x in range(self.demensions)] for y in range(self.demensions)]
+        self.grid = np.zeros(
+                (self.demensions, self.demensions),
+                dtype = int
+                )
         self.__add_value()
         self.__add_value()
+        self.__save_grid()
+
+
 
     def up(self):
-        pass
-    def down(self):
-        pass
-    def right(self):
-        # fliping grid verticaly
-        for row in self.grid:
-            for i in range(len(self.grid)/2):
-                tmp = row[i]
-                row[i] = row[-i]
-                row[-i] = tmp
-
-
-
-    def left(self):
-        self.__motion()
+        self.grid = np.transpose(self.grid)
+        self.__colide_to_left()
+        self.grid = np.transpose(self.grid)
         self.__update()
 
+    def down(self):
+        self.grid = np.transpose(self.grid)
+        self.grid = np.fliplr(self.grid)
+        self.__colide_to_left()
+        self.grid = np.fliplr(self.grid)
+        self.grid = np.transpose(self.grid)
+        self.__update()
 
+    def right(self):
+        self.grid = np.fliplr(self.grid)
+        self.__colide_to_left()
+        self.grid = np.fliplr(self.grid)
+        self.__update()
 
-    def __motion(self):
-        # remove None values
-        clear_grid = [[x for x in row if x] for row in self.grid]
-        new_grid = []
-        for row in clear_grid:
-            if len(row) >= 2:
-                new_row = []
-                i = 0
-                pair = []
-                while i < len(row):
-                    if len(pair) != 2:
-                        pair.append(row[i])
-                        i+=1
-                    else:
-                        if pair[0] == pair[1]:
-                            self.score += pair[0] + pair[1]
-                            new_row.append(pair[0] + pair[1])
-                            i+=1
-                        else:
-                            new_row.append(pair[0])
-                            pair = list(pair[1])
-                            i+=1
-                new_grid.append(new_row)
-            else:
-                new_grid.append(row)
+    def left(self):
+        self.__colide_to_left()
+        self.__update()
 
-        for row in new_grid:
-            while len(row) < self.demensions:
-                row.append(None)
-
-        self.grid = new_grid
+    def __colide_to_left(self):
+        def move_zeros(row):
+            end = 3
+            i = 0
+            while i < end:
+                if row[i] == 0:
+                    j = i
+                    while j < end:
+                        row[j], row[j+1] = row[j+1], row[j]
+                        j += 1
+                    end -=1
+                else:
+                    i += 1
+        for row in self.grid:
+            end = 3
+            move_zeros(row)
+            i = 0
+            while i < end:
+                if row[i] == row[i+1]:
+                    row[i] *= 2
+                    row[i+1] = 0
+                    i += 2
+                else:
+                    i += 1
+            move_zeros(row)
 
 
     def __add_value(self):
-        indeces = []
+        result = np.where(self.grid == 0.)
+        coordinates = list(zip(result[0], result[1]))
+        random_coor = coordinates[np.random.randint(0,len(coordinates))]
 
-        for i in range(self.demensions):
-            for j in range(self.demensions):
-                if self.grid[i][j] == None:
-                    indeces.append((i,j))
+        value = 4 if np.random.random() <= 0.1 else 2
 
-        if indeces:
-            random_pair = random.sample(indeces, 1)
-            random_pair = random_pair[0]
-            value = 2
+        self.grid[random_coor[0]][random_coor[1]] = value
 
-            if random.random() <= 0.1:
-                value = 4
-            self.score += value
-            self.grid[random_pair[0]][random_pair[1]] = value
-        else:
-            self.__game_over()
+        self.score += value
 
     def __update(self):
         self.__save_grid()
@@ -97,12 +102,16 @@ class Game2048:
     def __draw(self):
         for i in self.grid:
             for j in i:
-                print(j, end='\t')
+                if j == 0:
+                    print('', end='\t')
+                else:
+                    print(j, end='\t')
             print("")
         print('')
         print(f"Score: {self.score}\tPotential: {self.potential}")
 
-
+    def __wait_for_key(self):
+        pass
 
     def __save_grid(self):
         pass
