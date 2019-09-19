@@ -8,16 +8,12 @@ game.start_game()
 def on_press(key):
     try:
         if key.char == 'w' or key.char == 'W':
-            print('Motion: UP')
             game.up()
         elif key.char == 's' or key.char == 'S':
-            print('Motion: DOWN')
             game.down()
         elif key.char == 'a' or key.char == 'A':
-            print('Motion: LEFT')
             game.left()
         elif key.char == 'd' or key.char == 'D':
-            print('Motion: RIGHT')
             game.right()
         elif key.char == 'r' or key.char == 'R':
             game.undo()

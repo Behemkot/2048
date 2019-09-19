@@ -33,12 +33,14 @@ class Game2048:
 
 
     def up(self):
+        self.__save_grid()
         self.grid = np.transpose(self.grid)
         self.__colide_to_left()
         self.grid = np.transpose(self.grid)
         self.__update()
 
     def down(self):
+        self.__save_grid()
         self.grid = np.transpose(self.grid)
         self.grid = np.fliplr(self.grid)
         self.__colide_to_left()
@@ -47,12 +49,14 @@ class Game2048:
         self.__update()
 
     def right(self):
+        self.__save_grid()
         self.grid = np.fliplr(self.grid)
         self.__colide_to_left()
         self.grid = np.fliplr(self.grid)
         self.__update()
 
     def left(self):
+        self.__save_grid()
         self.__colide_to_left()
         self.__update()
 
@@ -114,10 +118,10 @@ class Game2048:
         if self.move_made:
             self.__add_value()
             self.__calculate_potential()
-            self.__save_grid()
             self.__draw()
 
     def __draw(self):
+        print('')
         for i in self.grid:
             for j in i:
                 if j == 0:
@@ -130,11 +134,12 @@ class Game2048:
 
 
     def __save_grid(self):
+        grid = np.copy(self.grid)
         if len(self.memory) == 5:
             self.memory.pop(0)
-            self.memory.append(self.grid)
+            self.memory.append(grid)
         else:
-            self.memory.append(self.grid)
+            self.memory.append(grid)
 
     def __calculate_potential(self):
         self.potential = 0
