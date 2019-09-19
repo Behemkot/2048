@@ -19,6 +19,12 @@ def on_press(key):
         elif key.char == 'd' or key.char == 'D':
             print('Motion: RIGHT')
             game.right()
+        elif key.char == 'r' or key.char == 'R':
+            game.undo()
+        elif key.char == 'p' or key.char == 'P':
+            game.new_game()
+        elif key.char == 'c' or key.char == 'C':
+            game.check()
     except AttributeError:
         print('special key {0} pressed'.format(
             key))
